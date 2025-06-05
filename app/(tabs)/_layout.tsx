@@ -1,43 +1,118 @@
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { useEffect, useState } from 'react';
+import Splash from '../splash';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+export default function RootLayout() {
+  const [isReady, setIsReady] = useState(false);
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  useEffect(() => {
+    const prepare = async () => {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await AsyncStorage.getItem('authToken');
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsReady(true);
+      }
+    };
+    prepare();
+  }, []);
+
+  if (!isReady) {
+    return <Splash />;
+  }
 
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
+      screenOptions={({ route }) => {
+        // حساب ما إذا كان هذا التاب هو الرئيسية
+        const isHome = route.name === 'home/index';
+
+        return {
+          tabBarIcon: ({ color, size }) => {
+            // تصغير حجم الأيقونات قليلاً لتناسب الشاشة
+            const iconSize = isHome ? size : size - 2;
+
+            if (route.name === 'home/index') {
+              return <Ionicons name="home-outline" size={iconSize} color={color} />;
+            }
+            if (route.name === 'cart/index') {
+              return <Ionicons name="cart-outline" size={iconSize} color={color} />;
+            }
+            if (route.name === 'profile/index') {
+              return <Ionicons name="person-outline" size={iconSize} color={color} />;
+            }
+            if (route.name === 'login/index') {
+              return <Ionicons name="log-in-outline" size={iconSize} color={color} />;
+            }
+            if (route.name === 'register/index') {
+              return <Ionicons name="person-add-outline" size={iconSize} color={color} />;
+            }
+            if (route.name === 'offers/index') {
+              return <Ionicons name="pricetag-outline" size={iconSize} color={color} />;
+            }
+            if (route.name === 'e-medicin/index') {
+              return <Ionicons name="pulse-outline" size={iconSize} color={color} />;
+            }
+            return null;
           },
-          default: {},
-        }),
-      }}>
+          tabBarLabel: (() => {
+            // تقصير أسماء التابات الطويلة
+            if (route.name === 'home/index') return 'الرئيسية';
+            if (route.name === 'cart/index') return 'السلة';
+            if (route.name === 'profile/index') return 'حسابي';         // تم تقصيرها
+            if (route.name === 'login/index') return 'الدخول';          // تم تقصيرها
+            if (route.name === 'register/index') return 'التسجيل';      // تم تقصيرها
+            if (route.name === 'offers/index') return 'العروض';
+            if (route.name === 'e-medicin/index') return 'الطبيب';      // تم تقصيرها
+            return '';
+          })(),
+          tabBarActiveTintColor: '#00AEEF',
+          tabBarInactiveTintColor: '#888',
+          headerShown: false,
+          // أنماط شريط التابات
+          tabBarStyle: {
+            height: 65,  // زيادة الارتفاع قليلاً
+            paddingBottom: 12,
+            paddingHorizontal: 2,  // هوامش جانبية صغيرة
+          },
+          // أنماط عناصر التاب
+          tabBarItemStyle: {
+            flex: 1,
+            marginHorizontal: 1,   // هوامش صغيرة بين التابات
+            paddingHorizontal: 0,
+            maxWidth: isHome ? 60 : 50,  // حد أقصى لعرض التاب
+          },
+          // أنماط نص التاب
+          tabBarLabelStyle: {
+            fontSize: isHome ? 10 : 9,  // حجم خط أصغر
+            fontWeight: isHome ? '700' : '500',
+            marginTop: 1,  // تقليل المسافة بين الأيقونة والنص
+            textAlign: 'center',
+          },
+          // إخفاء تاب index
+          tabBarButton: route.name === 'index' ? () => null : undefined,
+        };
+      }}
+    >
+      {/* ترتيب التابات - الرئيسية في المنتصف */}
+      <Tabs.Screen name="register/index" />
+      <Tabs.Screen name="e-medicin/index" />
+      <Tabs.Screen name="offers/index" />
+      <Tabs.Screen name="home/index" />  {/* الرئيسية في المنتصف */}
+      <Tabs.Screen name="profile/index" />
+      <Tabs.Screen name="cart/index" />
+      <Tabs.Screen name="login/index" />
+
+      {/* إخفاء التاب الرئيسي */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarButton: () => null,
+          tabBarItemStyle: { width: 0, height: 0, display: 'none' },
         }}
       />
     </Tabs>
