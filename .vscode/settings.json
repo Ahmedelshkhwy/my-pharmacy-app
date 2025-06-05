@@ -3,5 +3,7 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "json.schemaDownload.enable": true,
+  "http.proxyStrictSSL": false
 }

@@ -6,8 +6,16 @@ const PRIMARY = '#23B6C7';
 const PINK = '#E94B7B';
 const BG = '#E6F3F7';
 
+// تعريف نوع عنصر السلة
+type CartItemType = {
+  id: string;
+  name: string;
+  price: number;
+  qty: number;
+};
+
 // بيانات افتراضية للسلة
-const CART_ITEMS = [
+const CART_ITEMS: CartItemType[] = [
   { id: '1', name: 'بنادول اكسترا', price: 12, qty: 2 },
   { id: '2', name: 'فيتامين سي 1000', price: 25, qty: 1 },
 ];
@@ -15,7 +23,7 @@ const CART_ITEMS = [
 export default function CartScreen() {
   const total = CART_ITEMS.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: CartItemType }) => (
     <View style={styles.cartItem}>
       <Ionicons name="medkit-outline" size={28} color={PRIMARY} style={{ marginRight: 12 }} />
       <View style={{ flex: 1 }}>
@@ -41,7 +49,7 @@ export default function CartScreen() {
           <FlatList
             data={CART_ITEMS}
             renderItem={renderItem}
-            keyExtractor={item => item.id}
+            keyExtractor={(item: CartItemType) => item.id}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
           <View style={styles.totalBox}>
